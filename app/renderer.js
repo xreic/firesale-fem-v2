@@ -1,5 +1,5 @@
 const marked = require('marked');
-const { remote } = require('electron');
+const { remote, ipcRenderer } = require('electron');
 
 const markdownView = document.querySelector('#markdown');
 const htmlView = document.querySelector('#html');
@@ -23,4 +23,12 @@ markdownView.addEventListener('keyup', (event) => {
 openFileButton.addEventListener('click', () => {
   let mainProc = remote.require('./main');
   mainProc.getFileFromUser();
+});
+
+// ipc = interprocess communication
+// arguments in callback are always event and
+//   then all the other parameters of the corresponding webContents.send call
+ipcRenderer.on('file-opened', (event, file, content) => {
+  markdownView.value = content;
+  renderMarkdownToHtml(content);
 });

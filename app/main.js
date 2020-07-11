@@ -43,7 +43,12 @@ exports.getFileFromUser = () => {
 
   // Pick and read only the first file from the selection
   const file = files[0];
+  openFile(file);
+};
+
+const openFile = (file) => {
   const content = fs.readFileSync(file).toString();
 
-  console.log(content);
+  // first argument is an arbitrary message string to be read
+  mainWindow.webContents.send('file-opened', file, content);
 };
