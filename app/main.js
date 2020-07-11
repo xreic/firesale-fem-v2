@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 // Destructure the functionality we want from the "electron" object
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, Menu } = require('electron');
 
 // Variable where the program will "live"
 let mainWindow = null;
@@ -9,6 +9,10 @@ let mainWindow = null;
 app.on('ready', () => {
   // Default the app to not show
   mainWindow = new BrowserWindow({ show: false });
+
+  // Custom menu
+  // Will remove/override all default hotkeys + keyboard shortcuts
+  Menu.setApplicationMenu(applicationMenu);
 
   // Load the HTML + CSS
   mainWindow.loadFile(`${__dirname}/index.html`);
@@ -92,3 +96,46 @@ const openFile = (exports.openFile = (file) => {
   // first argument is an arbitrary message string to be read
   mainWindow.webContents.send('file-opened', file, content);
 });
+
+const template = [
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open File',
+        accelerator: 'CommandOrControl+O',
+        click() {
+          exports.getFileFromUser();
+        },
+      },
+      {
+        label: 'Save File',
+        accelerator: 'CommandOrControl+S',
+        click() {
+          mainWindow.webContents.send('save-markdown');
+        },
+      },
+      {
+        label: 'Copy',
+        role: 'copy',
+      },
+    ],
+  },
+];
+
+if (process.platform === 'darwin') {
+  const applicationName = 'Fire Sale';
+
+  template.unshift({
+    label: applicationName,
+    submenu: [
+      { label: `About ${applicationName}`, role: 'about' },
+      {
+        label: `Quit ${applicationName}`,
+        role: 'quit',
+      },
+    ],
+  });
+}
+
+const applicationMenu = Menu.buildFromTemplate(template);

@@ -1,6 +1,6 @@
 const path = require('path');
 const marked = require('marked');
-const { remote, ipcRenderer } = require('electron');
+const { remote, ipcRenderer, shell } = require('electron');
 
 let filePath = null;
 let originalContent = '';
@@ -44,6 +44,9 @@ const updateUserInterface = (isEdited) => {
   }
   currentWindow.setDocumentEdited(isEdited);
 
+  showFileButton.disabled = !filePath;
+  openInDefaultButton.disabled = !filePath;
+
   saveMarkdownButton.disabled = !isEdited;
   revertButton.disabled = !isEdited;
 
@@ -62,12 +65,30 @@ openFileButton.addEventListener('click', () => {
   mainProc.getFileFromUser();
 });
 
-saveMarkdownButton.addEventListener('click', () => {
+const saveMarkdown = () => {
   mainProc.saveMarkdown(filePath, markdownView.value);
-});
+};
+
+saveMarkdownButton.addEventListener('click', saveMarkdown);
 
 saveHtmlButton.addEventListener('click', () => {
   mainProc.saveHtml(htmlView.innerHTML);
+});
+
+showFileButton.addEventListener('click', () => {
+  if (!filePath) {
+    return alert('No');
+  }
+
+  shell.showItemInFolder(filePath);
+});
+
+openInDefaultButton.addEventListener('click', () => {
+  if (!filePath) {
+    return alert('No');
+  }
+
+  shell.openItem(filePath);
 });
 
 // ipc = interprocess communication
@@ -82,6 +103,8 @@ ipcRenderer.on('file-opened', (event, file, content) => {
 
   updateUserInterface(false);
 });
+
+ipcRenderer.on('save-markdown', saveMarkdown);
 
 // prevent drag and drop
 document.addEventListener('dragstart', (event) => event.preventDefault());
