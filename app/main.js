@@ -22,7 +22,7 @@ app.on('ready', () => {
 
 exports.getFileFromUser = () => {
   // Save into the variable the return of whatever is selected in the file picker as an array
-  const files = dialog.showOpenDialog({
+  const files = dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
     buttonLabel: 'Unveil',
     title: 'Open Fire Sale Document',
@@ -50,7 +50,7 @@ exports.saveMarkdown = (file, content) => {
   // When there is no file to save towards
   // prompt them to figure a path out
   if (!file) {
-    file = dialog.showSaveDialog({
+    file = dialog.showSaveDialog(mainWindow, {
       title: 'Save Markdown',
       defaultPath: app.getPath('desktop'),
       filters: [
@@ -71,7 +71,19 @@ exports.saveMarkdown = (file, content) => {
   openFile(file);
 };
 
-const openFile = (file) => {
+exports.saveHtml = (content) => {
+  const file = dialog.showSaveDialog(mainWindow, {
+    title: 'Save HTML',
+    defaultPath: app.getPath('desktop'),
+    filters: [{ name: 'HTML Files', extensions: ['html', 'htm'] }],
+  });
+
+  if (!file) return;
+
+  fs.writeFileSync(file, content);
+};
+
+const openFile = (exports.openFile = (file) => {
   const content = fs.readFileSync(file).toString();
 
   // add the opened file to the list of recent items
@@ -79,4 +91,4 @@ const openFile = (file) => {
 
   // first argument is an arbitrary message string to be read
   mainWindow.webContents.send('file-opened', file, content);
-};
+});
