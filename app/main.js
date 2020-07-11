@@ -27,6 +27,8 @@ const getFileFromUser = () => {
   // Save into the variable the return of whatever is selected in the file picker as an array
   const files = dialog.showOpenDialog({
     properties: ['openFile'],
+    buttonLabel: 'Unveil',
+    title: 'Open Fire Sale Document',
     filters: [
       {
         name: 'Markdown Files',
