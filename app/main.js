@@ -13,9 +13,6 @@ app.on('ready', () => {
   // Load the HTML + CSS
   mainWindow.loadFile(`${__dirname}/index.html`);
 
-  // Function call to open the native system file picker
-  getFileFromUser();
-
   // Once the HTML + CSS have loaded then show
   // This is the skip the white flash while the HTML + CSS are loading on start up
   mainWindow.once('ready-to-show', () => {
@@ -23,7 +20,7 @@ app.on('ready', () => {
   });
 });
 
-const getFileFromUser = () => {
+exports.getFileFromUser = () => {
   // Save into the variable the return of whatever is selected in the file picker as an array
   const files = dialog.showOpenDialog({
     properties: ['openFile'],
