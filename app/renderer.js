@@ -38,7 +38,10 @@ const updateUserInterface = (isEdited) => {
    * Icon within the title bar
    * Close button will have a dot within it if there are edits
    */
-  currentWindow.setRepresentedFilename(filePath);
+  if (filePath) {
+    // To guard the case of saving a new file where no path exists
+    currentWindow.setRepresentedFilename(filePath);
+  }
   currentWindow.setDocumentEdited(isEdited);
 
   saveMarkdownButton.disabled = !isEdited;
@@ -59,6 +62,10 @@ openFileButton.addEventListener('click', () => {
   mainProc.getFileFromUser();
 });
 
+saveMarkdownButton.addEventListener('click', () => {
+  mainProc.saveMarkdown(filePath, markdownView.value);
+});
+
 // ipc = interprocess communication
 // arguments in callback are always event and
 //   then all the other parameters of the corresponding webContents.send call
@@ -69,5 +76,5 @@ ipcRenderer.on('file-opened', (event, file, content) => {
   markdownView.value = content;
   renderMarkdownToHtml(content);
 
-  updateUserInterface();
+  updateUserInterface(false);
 });

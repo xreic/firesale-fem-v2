@@ -46,8 +46,36 @@ exports.getFileFromUser = () => {
   openFile(file);
 };
 
+exports.saveMarkdown = (file, content) => {
+  // When there is no file to save towards
+  // prompt them to figure a path out
+  if (!file) {
+    file = dialog.showSaveDialog({
+      title: 'Save Markdown',
+      defaultPath: app.getPath('desktop'),
+      filters: [
+        {
+          name: 'Markdown Files',
+          extensions: ['md', 'markdown', 'mdown', 'marcdown'],
+        },
+      ],
+    });
+  }
+
+  // In case they ignore setting up a save path
+  if (!file) {
+    return;
+  }
+
+  fs.writeFileSync(file, content);
+  openFile(file);
+};
+
 const openFile = (file) => {
   const content = fs.readFileSync(file).toString();
+
+  // add the opened file to the list of recent items
+  app.addRecentDocument(file);
 
   // first argument is an arbitrary message string to be read
   mainWindow.webContents.send('file-opened', file, content);
