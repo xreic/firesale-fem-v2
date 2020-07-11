@@ -1,5 +1,12 @@
+const path = require('path');
 const marked = require('marked');
 const { remote, ipcRenderer } = require('electron');
+
+let filePath = null;
+let originalContent = '';
+
+const mainProc = remote.require('./main');
+const currentWindow = remote.getCurrentWindow();
 
 const markdownView = document.querySelector('#markdown');
 const htmlView = document.querySelector('#html');
@@ -15,13 +22,40 @@ const renderMarkdownToHtml = (markdown) => {
   htmlView.innerHTML = marked(markdown, { sanitize: true });
 };
 
+const updateUserInterface = (isEdited) => {
+  let title = 'Fire Sale';
+
+  if (filePath) {
+    title = `${path.basename(filePath)} - ${title}`;
+  }
+
+  if (isEdited) {
+    title = `${title} - Edited`;
+  }
+
+  /**
+   * MacOS stuff
+   * Icon within the title bar
+   * Close button will have a dot within it if there are edits
+   */
+  currentWindow.setRepresentedFilename(filePath);
+  currentWindow.setDocumentEdited(isEdited);
+
+  saveMarkdownButton.disabled = !isEdited;
+  revertButton.disabled = !isEdited;
+
+  currentWindow.setTitle(title);
+};
+
+// Every key up triggers this to update the left and right text views
 markdownView.addEventListener('keyup', (event) => {
   const currentContent = event.target.value;
+
   renderMarkdownToHtml(currentContent);
+  updateUserInterface(currentContent !== originalContent);
 });
 
 openFileButton.addEventListener('click', () => {
-  let mainProc = remote.require('./main');
   mainProc.getFileFromUser();
 });
 
@@ -29,6 +63,11 @@ openFileButton.addEventListener('click', () => {
 // arguments in callback are always event and
 //   then all the other parameters of the corresponding webContents.send call
 ipcRenderer.on('file-opened', (event, file, content) => {
+  filePath = file;
+  originalContent = content;
+
   markdownView.value = content;
   renderMarkdownToHtml(content);
+
+  updateUserInterface();
 });
