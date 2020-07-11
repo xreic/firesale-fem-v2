@@ -61,20 +61,34 @@ markdownView.addEventListener('keyup', (event) => {
   updateUserInterface(currentContent !== originalContent);
 });
 
+/**
+ * Saving as markdown
+ */
+const saveMarkdown = () => {
+  mainProc.saveMarkdown(filePath, markdownView.value);
+};
+saveMarkdownButton.addEventListener('click', saveMarkdown);
+ipcRenderer.on('save-markdown', saveMarkdown);
+
+/**
+ * Saving as HTML
+ */
+const saveHtml = () => {
+  mainProc.saveHtml(htmlView.innerHTML);
+};
+saveHtmlButton.addEventListener('click', saveHtml);
+ipcRenderer.on('save-html', saveHtml);
+
+/**
+ * Default file opening action
+ */
 openFileButton.addEventListener('click', () => {
   mainProc.getFileFromUser();
 });
 
-const saveMarkdown = () => {
-  mainProc.saveMarkdown(filePath, markdownView.value);
-};
-
-saveMarkdownButton.addEventListener('click', saveMarkdown);
-
-saveHtmlButton.addEventListener('click', () => {
-  mainProc.saveHtml(htmlView.innerHTML);
-});
-
+/**
+ * Alternative file opening operations
+ */
 showFileButton.addEventListener('click', () => {
   if (!filePath) {
     return alert('No');
@@ -103,8 +117,6 @@ ipcRenderer.on('file-opened', (event, file, content) => {
 
   updateUserInterface(false);
 });
-
-ipcRenderer.on('save-markdown', saveMarkdown);
 
 // prevent drag and drop
 document.addEventListener('dragstart', (event) => event.preventDefault());

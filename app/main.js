@@ -116,6 +116,13 @@ const template = [
         },
       },
       {
+        label: 'Save HTML',
+        accelerator: 'CommandOrControl+D',
+        click() {
+          mainWindow.webContents.send('save-html');
+        },
+      },
+      {
         label: 'Copy',
         role: 'copy',
       },
